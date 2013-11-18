@@ -24,7 +24,7 @@ if( Sys.info()['sysname'] == "Windows") {
 	emdb <- paste('C:/Documents and Settings/',user,'/My\ Documents/emWave/emwave.emdb',sep="")
 } else {
     #assumed the linux OS has the same username
-	emdb <- paste('/windows/D/Documents\ and\ Settings/',user,'/My\ Documents/emWave/emwave.emdb',sep="")
+	emdb <- paste('/Users/',user,'/Documents/emWave/emwave.emdb',sep="")
 }
 
 #if emwave directory cannot be found then assume we have a copy of the db in the working directory
