@@ -140,7 +140,7 @@ hrvplot <- function(n=dim(h)[1]) {
     cat('Start',strftime(h$date[n],format="%x %X"),'\n')
     cat('End  ',strftime(h$end[n],format="%x %X"),'\n')
     cat('session time',as.integer(h$sessiontime[n]/60),'min',h$sessiontime[n] %% 60,'s','\n')
-    cat('mean HR:',as.integer(mean(pulse)),'BPM\n')
+    cat('mean HR:', mean(h$BPM[[n]]),'BPM\n')
     cat('final score',h$FinalScore[n],'\n')
     cat('difficulty level',h$ChallengeLevel[n],'\n')
     cat('Coherence Ratio Low/Med/High%',as.integer(h$PctLow[n]),'/',as.integer(h$PctMedium[n]),'/',as.integer(h$PctHigh[n]),'\n')
