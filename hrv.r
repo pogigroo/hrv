@@ -38,6 +38,7 @@ con <- dbConnect(m, dbname=emdb)
 
 dbListTables(con)
 #sessions may not be stored in chronological order as sessions can be carried out and uploaded only at a later time
+# dbSendPreparedQuery(con, "DROP WHERE IBIEndTime - IBIStartTime , ")
 rs <- dbSendQuery(con, "select * from PrimaryData order by IBIStartTime")
 h <- fetch(rs, n=-1)
 dbClearResult(rs)
@@ -131,6 +132,9 @@ hrvplot <- function(n=dim(h)[1]) {
     plot(unlist(h$BPM[n]) ~ unlist(h$timeIBI[n]),xlab="time (s)",ylab="mean Heart Rate (BPM)",type ="l")
     #highlight low coherence sequences
     abline(v=5*(which(ts(unlist(h$ZoneScore[n]) == 0))-1),col="red")
+	#highlight high coherence sequences
+    abline(v=5*(which(ts(unlist(h$ZoneScore[n]) == 2))-1),col="green")
+		
     plot(ts(unlist(h$AccumZoneScore[n])),xlab="time",ylab="Accumulated Coherence Score",type ="l")
     abline(coef=lm(yl~xl)$coef,col="grey")
     abline(coef=lm(yh~xh)$coef,col="grey")
