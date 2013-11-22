@@ -50,6 +50,9 @@ h$PctLow         <- 100 - h$PctMedium - h$PctHigh
 h$date           <- as.POSIXct(h$IBIStartTime,origin="1970-01-01")
 h$end            <- as.POSIXct(h$IBIEndTime,origin="1970-01-01")
 h$sessiontime    <- h$IBIEndTime - h$IBIStartTime
+# dropping sessions under two minutes 
+h<-h[h$sessiontime>120,]
+
 h$Level          <- h$ChallengeLevel
 h$ChallengeLevel <- factor( h$ChallengeLevel
                             ,levels=1:4
@@ -68,6 +71,7 @@ h$SampledIBI           <- hex2int(h$SampledIBI)
 h$ArtifactFlag         <- hex2int(h$ArtifactFlag)
 h$AccumZoneScore       <- hex2int(h$AccumZoneScore)
 h$ZoneScore            <- hex2int(h$ZoneScore)
+# TODO Look up meaning of Emtrainment Parameter
 h$EntrainmentParameter <- hex2int(h$EntrainmentParameter)
 #convert interbeat intervals to beats per minute [exclude zeroes to avoid Inf]
 h$BPM 		<- lapply(h$LiveIBI,function(x) 60*1000/x[x>0] )
@@ -113,7 +117,8 @@ hrvweekday <- function() {
 
     ScoreMatrix <- matrix(mflat$h.FinalScore,nrow=7,ncol=max(h$Week))
     #set threshold at 200 points
-    horizonplot(ts(t(ScoreMatrix)),layout=c(7,1),origin=200)
+    # TODO find source for horizonplot fn
+	# horizonplot(ts(t(ScoreMatrix)),layout=c(7,1),origin=200)
 }
 
 hrvplot <- function(n=dim(h)[1]) {
@@ -127,18 +132,19 @@ hrvplot <- function(n=dim(h)[1]) {
     xh <- c(60,300)  * length(unlist(h$AccumZoneScore[n])) / h$sessiontime[n]
     #* 1000 / h$EntrainmentIntervalTime[77]
     yh <- c(26,120)
-    
-    par(mfrow=c(3,1),mai=c(0.4,0.4,0.2,0.2),lab=c(10,10,7))
-    plot(unlist(h$BPM[n]) ~ unlist(h$timeIBI[n]),xlab="time (s)",ylab="mean Heart Rate (BPM)",type ="l")
+    # TODO Fix labeling for hrvplot
+    par(mfrow=c(3,1))
+    plot(unlist(h$BPM[n]) ~ unlist(h$timeIBI[n]),xlab="time (s)",ylab="Mean HR (BPM)",type ="l")
     #highlight low coherence sequences
+	# TODO fix ts specification to fix hrvplot
     abline(v=5*(which(ts(unlist(h$ZoneScore[n]) == 0))-1),col="red")
 	#highlight high coherence sequences
     abline(v=5*(which(ts(unlist(h$ZoneScore[n]) == 2))-1),col="green")
 		
-    plot(ts(unlist(h$AccumZoneScore[n])),xlab="time",ylab="Accumulated Coherence Score",type ="l")
+    plot(ts(unlist(h$AccumZoneScore[n])),xlab="Time",ylab="Acc Coherence",type ="l")
     abline(coef=lm(yl~xl)$coef,col="grey")
     abline(coef=lm(yh~xh)$coef,col="grey")
-    plot(ts(unlist(h$EntrainmentParameter[n])),xlab="time",ylab="Entrainment Parameter",type ="l")
+    plot(ts(unlist(h$EntrainmentParameter[n])),xlab="Time",ylab="Entrainment Parameter",type ="l")
     
     #SESSION DETAILS
     cat('Start',strftime(h$date[n],format="%x %X"),'\n')
@@ -200,7 +206,7 @@ hrvexport <- function(x1="") {
   }
 }
 
-LoadBeatEmwave <- function(HRVData, h, scale = 0.001, verbose = NULL) {
+LoadBeatEmwave <- function(HRVData=rr, h=h, scale = 0.001, verbose = NULL) {
   #load HRVData from our own emwave import already in RAM
   HRVData$datetime <- as.POSIXlt(h$date,format="%Y-%m-%d %X")
   HRVData$Beat <- data.frame(Time = c(0,unlist(h$timeIBI)) * scale)
@@ -210,10 +216,8 @@ LoadBeatEmwave <- function(HRVData, h, scale = 0.001, verbose = NULL) {
     cat("  Time:",strftime(HRVData$datetime,format="%X"),"\n")
     cat("  Number of beats:",length(HRVData$Beat$Time),"\n")
   }
-  return(HRVData)
 }
- 
 
 LoadBeatEMDB <- function(HRVData, RecordName, RecordPath = ".", scale = 1, verbose = NULL) {
-  #load HRVData from emwave.emdb file for RHRV support
+  # TODO load HRVData from emwave.emdb file for RHRV support
 }
